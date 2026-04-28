@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 
 const userSchema = new Schema({
-  userName: {
+  username: {
     type: String,
     lowercase: true,
     required: true,
@@ -17,6 +17,10 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  isVerified: {
+  type: Boolean,
+  default: false
+},
 }, {timestamps: true}
 );
 
