@@ -56,27 +56,7 @@ export const loginUser = async (req, res) => {
 }
 };
 
-export const verifyUser = async (req, res) => {
-  try {
-    const decoded = jwt.verify(
-      req.params.token,
-      process.env.JWT_SECRET
-    );
 
-    const user = await User.findById(decoded.id);
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    user.isVerified = true;
-    await user.save();
-
-    res.send("Email verified successfully");
-  } catch (err) {
-    res.status(400).send("Invalid or expired token");
-  }
-};
 
 
 
