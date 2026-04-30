@@ -20,14 +20,6 @@ const token = jwt.sign(
   process.env.JWT_SECRET,
   { expiresIn: "1d" }
 );
-
-const verifyLink = `http://localhost:5000/api/users/verify/${token}`;
-
-console.log("VERIFY LINK:", verifyLink);
-
-res.json({
-  message: "User registered. Verify link generated",
-});
 };
 
 export const loginUser = async (req, res) => {
