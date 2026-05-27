@@ -1,28 +1,27 @@
 import express from "express";
 import mongoose from "mongoose";
-import router from "./routes/user.js";
-import toDoRouter from "./routes/toDo.js"
 import dotenv from "dotenv";
+
+import userRouter from "./routes/user.js";
+import todoRouter from "./routes/toDo.js";
+
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT;
 
-mongoose
-  .connect(
-    `${process.env.MONGODB_URI}`,
-  )
-  .then(() => {
-    console.log("MongoDB Connected!!");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use("/user", router)
-app.use("/toDos", toDoRouter)
+app.use("/api/users", userRouter);
+app.use("/api/todos", todoRouter);
 
-app.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+    console.log("MongoDB Connected!!");
+
+    app.listen(process.env.PORT || 3000, () => {
+        console.log(`Server running on PORT ${process.env.PORT || 3000}`);
+    });
+})
+.catch((err) => {
+    console.log(err.message);
+});

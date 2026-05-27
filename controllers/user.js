@@ -1,54 +1,120 @@
 import { User } from "../models/user.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
-export const registerUser = async(req, res) => {
-  const { username, email, password } = req.body;
-  console.log(req.body)
+export const registerUser = async (req, res) => {
 
-  await User.create({
-    username,
-    email,
-    password,
-  });
-  res.json({msg : "User created successfully"})
+    try {
 
-// user save hone ke baad ↓
+        const { username, email, password } = req.body;
 
-const token = jwt.sign(
-  { id: User._id },
-  process.env.JWT_SECRET,
-  { expiresIn: "1d" }
-);
+        if(!username || !email || !password) {
+            return res.status(400).json({
+                message: "All fields required"
+            });
+        }
+
+        const existingUser = await User.findOne({ email });
+
+        if(existingUser) {
+            return res.status(400).json({
+                message: "User already exists"
+            });
+        }
+
+        await User.create({
+            username,
+            email,
+            password
+        });
+
+        return res.json({
+            message: "User registered successfully"
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            message: error.message
+        });
+    }
 };
 
 export const loginUser = async (req, res) => {
-    const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    try {
 
-    if (!user) return res.send("User not found");
+        const { email, password } = req.body;
 
-    const isMatch = await bcrypt.compare(password, user.password);
+        const user = await User.findOne({ email });
 
-    if (!isMatch) return res.send("Invalid password");
+        if(!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
 
-    const token = jwt.sign(
-        { id: user._id },
-        "secretkey",
-        { expiresIn: "1h" }
-    );
+        const isMatch = await user.comparePassword(password);
 
-    res.json({ token });
+        if(!isMatch) {
+            return res.status(400).json({
+                message: "Invalid credentials"
+            });
+        }
 
-    if (!user.isVerified) {
-  return res.status(401).json({
-    message: "Please verify your email first"
-  });
-}
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+
+        user.refreshToken = refreshToken;
+
+        await user.save();
+
+        return res.json({
+            accessToken,
+            refreshToken
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            message: error.message
+        });
+    }
 };
 
+export const refreshAccessToken = async (req, res) => {
 
+    try {
 
+        const { refreshToken } = req.body;
 
+        if(!refreshToken) {
+            return res.status(401).json({
+                message: "Refresh token required"
+            });
+        }
 
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET
+        );
+
+        const user = await User.findById(decoded.id);
+
+        if(!user || user.refreshToken !== refreshToken) {
+            return res.status(403).json({
+                message: "Invalid refresh token"
+            });
+        }
+
+        const newAccessToken = user.generateAccessToken();
+
+        return res.json({
+            accessToken: newAccessToken
+        });
+
+    } catch (error) {
+
+        return res.status(403).json({
+            message: "Invalid refresh token"
+        });
+    }
+};

@@ -1,26 +1,34 @@
 import jwt from "jsonwebtoken";
 
-export const authMiddleware = async (req, res, next) => {
-    try {
-    // 1. header se token lena
+const authMiddleware = async (req, res, next) => {
+
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-      return res.status(401).json({ message: "No token provided" });
+    if(!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
     }
 
-    // 2. "Bearer token" me se token extract
     const token = authHeader.split(" ")[1];
 
-    // 3. token verify
-    const decoded = jwt.verify(token,"secretkey");
+    try {
 
-    // 4. user info store
-    req.user = decoded;
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
 
-    // 5. next middleware / route
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-}
+        req.user = decoded;
+
+        next();
+
+    } catch (error) {
+
+        return res.status(401).json({
+            message: "Invalid token"
+        });
+    }
+};
+
+export default authMiddleware;
