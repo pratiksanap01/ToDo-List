@@ -121,3 +121,18 @@ export const refreshAccessToken = async (req, res) => {
         });
     }
 };
+
+export const logoutUser = async (req, res) => {
+    const user = await User.findById(req.user.id);
+    
+    if(!user){
+        return res.json({message: "User not exist"})
+    }
+    user.refreshToken = null;
+    await user.save();
+
+    return res.json({
+  "message": "Logged out successfully"
+});
+
+}
