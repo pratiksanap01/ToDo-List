@@ -10,11 +10,10 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-
 app.use("/api/users", userRouter);
 app.use("/api/todos", todoRouter);
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
     console.log("MongoDB Connected!!");
 

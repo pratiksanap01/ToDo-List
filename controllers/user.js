@@ -1,4 +1,5 @@
 import { User } from "../models/user.js";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
 
@@ -37,12 +38,14 @@ export const registerUser = async (req, res) => {
         });
     }
 };
-
 export const loginUser = async (req, res) => {
 
     try {
 
         const { email, password } = req.body;
+        if (!email) {
+            return res.json({message:"Email is required!!"})
+        }
 
         const user = await User.findOne({ email });
 
