@@ -28,12 +28,29 @@ export const getTodos = async (req, res) => {
 
     try {
 
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 2;
+
+        const skip = (page - 1) * limit;
+
+        const totalTodos = await Todo.countDocuments({
+            user: req.user.id
+        });
+
+        const totalPages = Math.ceil(totalTodos / limit);
+
         const todos = await Todo.find(
-            { user: req.user.id },
+            { user: req.user.id,
+            },
             "title description completed"
-        );
+        ).skip(skip)
+        .limit(limit);
 
         return res.json({
+            page,
+            limit,
+            totalTodos,
+            totalPages,
             todos
         });
 
@@ -69,7 +86,7 @@ export const updateTodo = async (req, res) => {
 
     try {
 
-        const id = req.params.id;
+        const id = req.params.id;   // user se id lena url mein 
 
         const updatedTodo = await Todo.findOneAndUpdate(
             {
