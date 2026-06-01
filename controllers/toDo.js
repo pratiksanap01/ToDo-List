@@ -115,3 +115,34 @@ export const updateTodo = async (req, res) => {
         });
     }
 };
+
+
+export const markCompleteIncomplete = async (req, res) => {
+    try {
+        const todo = await Todo.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        })
+        
+        if(!todo){
+            return res.status(404).json({message: "Can't find todo !!!"})
+        };
+
+
+        // Toggle Logic
+        todo.completed = !todo.completed;
+
+
+        await todo.save();
+
+        return res.json({
+            message: "Todo status updated",
+            completed: todo.completed
+});
+
+    } catch (error) {
+        return res.status(500).json({
+            message:error.message
+        })
+    }
+}
