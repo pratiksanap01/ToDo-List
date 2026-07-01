@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Session } from "./session.js";
+
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -23,7 +25,6 @@ const userSchema = new mongoose.Schema({
     refreshToken: {
         type: String
     }
-
 }, { timestamps: true });
 
 userSchema.pre("save", async function(next) {
@@ -43,7 +44,10 @@ userSchema.methods.comparePassword = async function(password) {
 
 userSchema.methods.generateAccessToken = function() {
     return jwt.sign(
-        { id: this._id },
+        {
+            id: this._id,
+            sessionID: this.sessionID
+        },
         process.env.JWT_SECRET,
         { expiresIn: "15m" }
     );

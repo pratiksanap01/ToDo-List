@@ -1,4 +1,6 @@
 import { User } from "../models/user.js";
+import crypto from "crypto";
+import { Session } from "../models/session.js";
 import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
@@ -62,6 +64,13 @@ export const loginUser = async (req, res) => {
                 message: "Invalid credentials"
             });
         }
+        const sessionId = crypto.randomUUID();
+
+        await Session.create({
+            sessionId,
+            user: user._id,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        });
 
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
@@ -72,7 +81,8 @@ export const loginUser = async (req, res) => {
 
         return res.json({
             accessToken,
-            refreshToken
+            refreshToken,
+            sessionId
         });
 
     } catch (error) {
@@ -124,6 +134,9 @@ export const refreshAccessToken = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
     const user = await User.findById(req.user.id);
+
+    const sessionId = req.headers["session-id"];
+    await Session.deleteOne({ sessionId });
     
     if(!user){
         return res.json({message: "User not exist"})
