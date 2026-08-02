@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import userRouter from "./routes/user.js";
 import todoRouter from "./routes/toDo.js";
+import adminRouter from "./routes/admin.js";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const app = express();
 app.use(express.json());
 app.use("/api/users", userRouter);
 app.use("/api/todos", todoRouter);
+app.use("/api/admin", adminRouter);
 
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
