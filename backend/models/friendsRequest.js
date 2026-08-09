@@ -18,3 +18,6 @@ const friendsRequestSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+
+export const FriendRequest = mongoose.model("FriendRequests",friendsRequestSchema);
