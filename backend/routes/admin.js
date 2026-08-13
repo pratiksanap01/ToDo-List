@@ -12,4 +12,6 @@ router.get(
     getAllUsers
 );
 
+
+
 export default router;
