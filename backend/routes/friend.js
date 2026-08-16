@@ -5,7 +5,8 @@ import {
     checkSelfRequest,
     checkAlreadyFriends,
     checkPendingRequest,
-    sendFriendRequest
+    sendFriendRequest,
+    acceptFriendRequest
 } from "../controllers/sendFriendRequest.js";
 
 import authMiddleware from "../middlewares/auth.js";
@@ -20,6 +21,12 @@ router.post(
     checkAlreadyFriends,
     checkPendingRequest,
     sendFriendRequest
+);
+
+router.patch(
+    "/request/:requestId/accept",
+    authMiddleware,
+    acceptFriendRequest
 );
 
 export default router;
