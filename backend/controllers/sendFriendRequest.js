@@ -169,3 +169,34 @@ export const acceptFriendRequest = async (req, res) => {
     }
 };
 
+export const rejectFriendRequest = async (req, res) => {
+    try {
+        const requestId = req.params.requestId;
+        const receiverId = req.user.id;
+
+        const friendRequest = await FriendRequest.findOne({
+            _id: requestId,
+            receiver: receiverId,
+            status: "pending"
+        });
+
+        if (!friendRequest) {
+            return res.status(404).json({
+                message: "Pending friend request not found"
+            });
+        }
+
+        friendRequest.status = "rejected";
+
+        await friendRequest.save();
+
+        return res.status(200).json({
+            message: "Friend request rejected successfully"
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+};
