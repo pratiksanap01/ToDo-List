@@ -3,7 +3,7 @@ import { User } from "../models/user.js";
 
 export const findReceiver = async (req, res,next) => {
     try {
-        const receiverID = req.params.receiverID
+        const receiverID = req.params.receiverID; 
 
         const receiver = await User.findById(receiverID)
         req.receiver = receiver;
@@ -221,4 +221,6 @@ export const removeFriend = async (req, res) => {
             message: error.message
         })
     }
+
+
 }
